@@ -22,21 +22,24 @@ def train(dqn: DQN, policy: Policy, config: Config):
 
         num_environment_steps = 0
         while True:
-            if environment.is_finished():
+            # check for end of episode
+            if environment.is_finished() or num_environment_steps >= config.MAX_EPISODE_STEPS:
+                num_steps_needed.append(num_environment_steps)
                 break
 
+            # do action in environment
             state, goal = environment.get_state_and_goal()
             action = policy.get_action(dqn, state, goal)
             next_state, reward = environment.perform_action(action)
-            is_finished = environment.is_finished()
 
+            # save replay of action
             replay = Replay(
                 state=state,
                 goal=goal,
                 action=action,
                 reward=reward,
                 next_state=next_state,
-                is_finished=is_finished
+                is_finished=environment.is_finished()
             )
             replay_buffer.enqueue(replay)
 
@@ -53,11 +56,8 @@ def train(dqn: DQN, policy: Policy, config: Config):
 
             policy.step()
 
-            # increment and check for finished
+            # increment
             num_environment_steps += 1
-            if is_finished or num_environment_steps >= config.MAX_EPISODE_STEPS:
-                num_steps_needed.append(num_environment_steps)
-                break
 
     metrics = {
         "loss": losses,
@@ -75,19 +75,18 @@ def evaluate(dqn: DQN, policy: Policy, num_episodes: int):
 
         num_environment_steps = 0
         while True:
-            if environment.is_finished():
+            # check for end of episode
+            if environment.is_finished() or num_environment_steps >= config.MAX_EPISODE_STEPS:
+                num_steps_needed.append(num_environment_steps)
                 break
 
+            # do action in environment
             state, goal = environment.get_state_and_goal()
             action = policy.get_action(dqn, state, goal)
             _, _ = environment.perform_action(action)
-            is_finished = environment.is_finished()
 
-            # increment and check for finished
+            # increment
             num_environment_steps += 1
-            if is_finished or num_environment_steps >= config.MAX_EPISODE_STEPS:
-                num_steps_needed.append(num_environment_steps)
-                break
 
     metrics = {
         "num_steps": num_steps_needed,
@@ -116,8 +115,7 @@ if __name__ == "__main__":
     plt.show()
 
     # evaluate
-    eval_policy = StrictlyGreedyPolicy()
-    eval_metrics = evaluate(dqn, eval_policy, num_episodes=config.NUM_EVAL_EPISODES)
+    eval_metrics = evaluate(dqn, StrictlyGreedyPolicy(), num_episodes=config.NUM_EVAL_EPISODES)
 
     print(eval_metrics)
     plt.hist(eval_metrics["num_steps"])
