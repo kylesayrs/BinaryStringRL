@@ -7,7 +7,6 @@ from environment import BitStringEnvironment
 from policy import Policy, EGreedyPolicy, StrictlyGreedyPolicy
 from dqn import DQN
 from replay import Replay, CircularBuffer
-from utils import moving_average
 
 
 def train(dqn: DQN, policy: Policy, config: Config):

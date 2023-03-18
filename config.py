@@ -11,7 +11,7 @@ class Config(BaseModel):
 
     # simulation
     NUM_EPISODES: int = Field(default=5000)
-    MAX_EPISODE_STEPS: int = Field(default=30)
+    MAX_EPISODE_STEPS: int = Field(default=50)
     REPLAY_BUFFER_SIZE: int = Field(default=128)
 
     # optimization
