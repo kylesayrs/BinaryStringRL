@@ -6,7 +6,7 @@ from config import Config
 from environment import BitStringEnvironment
 from policy import EGreedyPolicy
 from dqn import DQN
-from replay import Replay
+from replay import Replay, CircularBuffer
 
 def moving_average(a, n=3) :
     ret = numpy.cumsum(a, dtype=float)
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     )
     policy = EGreedyPolicy(config.POLICY_EPSILON)
 
-    replay_buffer = []
+    replay_buffer = CircularBuffer(config.REPLAY_BUFFER_SIZE)
     cumulative_loss = 0.0
     batch_counter = 0
     losses = []
@@ -56,14 +56,10 @@ if __name__ == "__main__":
                 next_state=next_state,
                 is_finished=is_finished
             )
-            replay_buffer.append(replay)
-            replay_buffer = replay_buffer[:config.REPLAY_BUFFER_SIZE]
+            replay_buffer.enqueue(replay)
 
             # optimize dqn
-            if config.BATCH_SIZE >= len(replay_buffer):
-                batch = replay_buffer
-            else:
-                batch = numpy.random.choice(replay_buffer, config.BATCH_SIZE, replace=False)
+            batch = numpy.random.choice(replay_buffer.to_list(), config.BATCH_SIZE, replace=True)
             loss_value = dqn.step_batch(batch)
             cumulative_loss += loss_value
 

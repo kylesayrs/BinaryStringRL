@@ -18,3 +18,7 @@ class Config:
 
     # logging
     LOGGING_RATE: int = 10
+
+
+    def __init__(self) -> None:
+        assert self.BATCH_SIZE <= self.REPLAY_BUFFER_SIZE

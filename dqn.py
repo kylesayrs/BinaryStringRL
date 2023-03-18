@@ -37,7 +37,7 @@ class BinaryStringModel(torch.nn.Module):
         x = self.linear_2(x)
         x = self.relu(x)
         x = self.linear_3(x)
-        #x = self.tanh(x)# * 2  # find a better final activation function
+        #x = self.tanh(x) * 2  # find a better final activation function
 
         return x
 
@@ -102,7 +102,6 @@ class DQN:
             future_action_qualities *= is_not_finished_transposed  # zero if finished
 
             target_values = rewards + self.discount * torch.max(future_action_qualities, dim=1).values
-            #targets = actions * torch.transpose(target_values.unsqueeze(0), 0, 1)
             action_indices = (actions == 1)
         
         # optimize
@@ -111,7 +110,6 @@ class DQN:
         
         # create targets
         with torch.no_grad():
-            #targets = torch.zeros(outputs.shape)
             targets = outputs.clone().detach()
             targets[action_indices] = target_values.to(torch.float32)
 

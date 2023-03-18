@@ -36,12 +36,17 @@ class Replay: # TODO: inherit from pydantic Model
         return str(self)
 
 
-if __name__ == "__main__":
-    replay = Replay(
-        state=torch.tensor([1, 2, 3]),
-        goal=torch.tensor([3, 2, 1]),
-        action=torch.tensor([1, 0, 0]),
-        reward=1.0,
-        next_state=torch.tensor([0, 1, 0]),
-        is_finished=False,
-    )
+class CircularBuffer:
+
+    def __init__(self, size: int) -> None:
+        self._size = size
+        self._queue = []
+
+
+    def enqueue(self, element):
+        self._queue.append(element)
+        self._queue = self._queue[-self._size:]
+        
+
+    def to_list(self):
+        return self._queue
