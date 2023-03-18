@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 from config import Config
 from environment import BitStringEnvironment
-from policy import Policy, EGreedyPolicy, EGreedyPolicyWithDelta
+from policy import Policy, EGreedyPolicy, StrictlyGreedyPolicy
 from dqn import DQN
 from replay import Replay, CircularBuffer
 from utils import moving_average
@@ -71,7 +71,7 @@ def evaluate(dqn: DQN, policy: Policy, num_episodes: int):
     num_steps_needed = []
 
     for _ in tqdm.tqdm(range(num_episodes)):
-        environment = BitStringEnvironment(config.STRING_LENGTH)
+        environment = BitStringEnvironment(config.STRING_LENGTH, config.DEVICE)
 
         num_environment_steps = 0
         while True:
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         config.LEARNING_RATE,
         config.DEVICE,
     )
-    policy = EGreedyPolicyWithDelta(config.POLICY_EPSILON, config.POLICY_EPSILON_DELTA)
+    policy = EGreedyPolicy(config.POLICY_EPSILON)
 
     # train
     dqn, policy, train_metrics = train(dqn, policy, config)
@@ -115,12 +115,9 @@ if __name__ == "__main__":
     plt.legend()
     plt.show()
 
-    plt.plot(moving_average(train_metrics["num_steps"], n=10), label="num_steps")
-    plt.legend()
-    plt.show()
-
     # evaluate
-    evaluation_metrics = evaluate(dqn, policy, num_episodes=config.NUM_EVAL_EPISODES)
+    eval_policy = StrictlyGreedyPolicy()
+    eval_metrics = evaluate(dqn, eval_policy, num_episodes=config.NUM_EVAL_EPISODES)
 
-    plt.stairs(*numpy.histogram(evaluation_metrics["num_steps"]))
+    plt.hist(eval_metrics["num_steps"])
     plt.show()

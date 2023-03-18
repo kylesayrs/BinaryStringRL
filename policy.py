@@ -4,7 +4,7 @@ import numpy
 
 
 class Policy(ABC):
-    def get_action(self, dqn, state: torch.Tensor, goal: torch.Tensor):
+    def get_action(self, dqn, state: torch.Tensor, goal: torch.Tensor) -> torch.Tensor:
         raise NotImplementedError()
     
 
@@ -17,7 +17,7 @@ class EGreedyPolicy(Policy):
         self.epsilon = epsilon
 
 
-    def get_action(self, dqn, state: torch.Tensor, goal: torch.Tensor):
+    def get_action(self, dqn, state: torch.Tensor, goal: torch.Tensor) -> torch.Tensor:
         action_qualities = dqn.infer_single(state, goal)
         max_quality_action_index = torch.argmax(action_qualities)
         #print(f"state: {state}")
@@ -37,10 +37,6 @@ class EGreedyPolicy(Policy):
         action[selected_action_index] = 1.0
 
         return action
-    
-
-    def step(self):
-        pass
 
 
 class EGreedyPolicyWithDelta(EGreedyPolicy):
@@ -52,3 +48,16 @@ class EGreedyPolicyWithDelta(EGreedyPolicy):
     def step(self):
         self.epsilon += self.delta_epsilon
         self.epsilon = min(self.epsilon, 1.0)
+
+
+class StrictlyGreedyPolicy():
+    def get_action(self, dqn, state: torch.Tensor, goal: torch.Tensor) -> torch.Tensor:
+        action_qualities = dqn.infer_single(state, goal)
+        max_quality_action_index = torch.argmax(action_qualities)
+        #print(f"state: {state}")
+        #print(f"action_qualities: {action_qualities}: {max_quality_action_index} : {self.epsilon}")
+
+        action = torch.zeros(len(action_qualities))
+        action[max_quality_action_index] = 1.0
+
+        return action

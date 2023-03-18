@@ -15,7 +15,7 @@ class Config(BaseModel):
     REPLAY_BUFFER_SIZE: int = Field(default=50)
 
     # optimization
-    LEARNING_RATE: float = Field(default=0.08)
+    LEARNING_RATE: float = Field(default=0.01)
     BATCH_SIZE: int = Field(default=25)
     DISCOUNT: float = Field(default=0.01)  # lower means more discount
     DQN_MOMENTUM: float = Field(default=0.55)
