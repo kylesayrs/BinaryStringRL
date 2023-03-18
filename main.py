@@ -4,14 +4,10 @@ import matplotlib.pyplot as plt
 
 from config import Config
 from environment import BitStringEnvironment
-from policy import EGreedyPolicy
+from policy import EGreedyPolicy, EGreedyPolicyWithDelta
 from dqn import DQN
 from replay import Replay, CircularBuffer
-
-def moving_average(a, n=3) :
-    ret = numpy.cumsum(a, dtype=float)
-    ret[n:] = ret[n:] - ret[:-n]
-    return ret[n - 1:] / n
+from utils import moving_average
 
 
 if __name__ == "__main__":
@@ -23,7 +19,7 @@ if __name__ == "__main__":
         config.DQN_MOMENTUM,
         config.LEARNING_RATE,
     )
-    policy = EGreedyPolicy(config.POLICY_EPSILON)
+    policy = EGreedyPolicyWithDelta(config.POLICY_EPSILON, config.POLICY_EPSILON_DELTA)
 
     replay_buffer = CircularBuffer(config.REPLAY_BUFFER_SIZE)
     cumulative_loss = 0.0
@@ -58,7 +54,7 @@ if __name__ == "__main__":
             )
             replay_buffer.enqueue(replay)
 
-            # optimize dqn
+            # optimize dqn and policy
             batch = numpy.random.choice(replay_buffer.to_list(), config.BATCH_SIZE, replace=True)
             loss_value = dqn.step_batch(batch)
             cumulative_loss += loss_value
@@ -71,6 +67,8 @@ if __name__ == "__main__":
 
                 cumulative_loss = 0.0
                 batch_counter = 0
+
+            policy.step()
 
             # increment and check for finished
             num_environment_steps += 1

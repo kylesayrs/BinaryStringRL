@@ -3,7 +3,8 @@ class Config:
     STRING_LENGTH: int = 2
 
     # policy
-    POLICY_EPSILON: float = 0.8
+    POLICY_EPSILON: float = 0.7
+    POLICY_EPSILON_DELTA: float = 0.00
 
     # simulation
     NUM_EPISODES: int = 5000
@@ -11,7 +12,7 @@ class Config:
     REPLAY_BUFFER_SIZE: int = 50
 
     # optimization
-    LEARNING_RATE: float = 0.02
+    LEARNING_RATE: float = 0.08
     BATCH_SIZE: int = 25
     DISCOUNT: float = 0.01  # lower means more discount
     DQN_MOMENTUM: float = 0.55
