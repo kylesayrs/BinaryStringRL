@@ -62,8 +62,8 @@ class DQN:
             param.requires_grad = False
         self.update_target_network(1.0)
 
-        self.optimizer = torch.optim.Adam(self.query_network.parameters(), lr=learning_rate)
-        #self.optimizer = torch.optim.SGD(self.query_network.parameters(), lr=learning_rate)
+        #self.optimizer = torch.optim.Adam(self.query_network.parameters(), lr=learning_rate)
+        self.optimizer = torch.optim.SGD(self.query_network.parameters(), lr=learning_rate)
         self.criterion = torch.nn.MSELoss()
 
 

@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, validator
 
 class Config(BaseModel):
     # environment
-    STRING_LENGTH: int = Field(default=2)
+    STRING_LENGTH: int = Field(default=3)
 
     # policy
     POLICY_EPSILON: float = Field(default=0.7)
@@ -11,14 +11,14 @@ class Config(BaseModel):
 
     # simulation
     NUM_EPISODES: int = Field(default=5000)
-    MAX_EPISODE_STEPS: int = Field(default=10)
-    REPLAY_BUFFER_SIZE: int = Field(default=50)
+    MAX_EPISODE_STEPS: int = Field(default=30)
+    REPLAY_BUFFER_SIZE: int = Field(default=128)
 
     # optimization
-    LEARNING_RATE: float = Field(default=0.01)
-    BATCH_SIZE: int = Field(default=25)
-    DISCOUNT: float = Field(default=0.01)  # lower means more discount
-    DQN_MOMENTUM: float = Field(default=0.55)
+    LEARNING_RATE: float = Field(default=0.03)
+    BATCH_SIZE: int = Field(default=16)
+    DISCOUNT: float = Field(default=0.3)  # coefficient on future q values
+    DQN_MOMENTUM: float = Field(default=1.0)
 
     # logging
     LOGGING_RATE: int = Field(default=10)

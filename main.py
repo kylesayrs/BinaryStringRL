@@ -119,5 +119,6 @@ if __name__ == "__main__":
     eval_policy = StrictlyGreedyPolicy()
     eval_metrics = evaluate(dqn, eval_policy, num_episodes=config.NUM_EVAL_EPISODES)
 
+    print(eval_metrics)
     plt.hist(eval_metrics["num_steps"])
     plt.show()
