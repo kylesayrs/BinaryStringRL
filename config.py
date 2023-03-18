@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, validator
 
 class Config(BaseModel):
     # environment
-    STRING_LENGTH: int = Field(default=3)
+    STRING_LENGTH: int = Field(default=4)
 
     # policy
     POLICY_EPSILON: float = Field(default=0.7)
@@ -17,8 +17,8 @@ class Config(BaseModel):
     # optimization
     LEARNING_RATE: float = Field(default=0.03)
     BATCH_SIZE: int = Field(default=16)
-    DISCOUNT: float = Field(default=0.3)  # coefficient on future q values
-    DQN_MOMENTUM: float = Field(default=1.0)
+    DISCOUNT: float = Field(default=0.8)  # coefficient on future q values
+    DQN_MOMENTUM: float = Field(default=0.7)
 
     # logging
     LOGGING_RATE: int = Field(default=10)
