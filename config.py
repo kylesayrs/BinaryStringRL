@@ -11,10 +11,10 @@ class Config:
     REPLAY_BUFFER_SIZE: int = 50
 
     # optimization
-    LEARNING_RATE: float = 0.005
-    BATCH_SIZE: int = 20
-    DISCOUNT: float = 0.3  # lower means more discount
-    DQN_MOMENTUM: float = 0.75
+    LEARNING_RATE: float = 0.02
+    BATCH_SIZE: int = 25
+    DISCOUNT: float = 0.01  # lower means more discount
+    DQN_MOMENTUM: float = 0.55
 
     # logging
     LOGGING_RATE: int = 10

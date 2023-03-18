@@ -35,8 +35,8 @@ class BinaryStringModel(torch.nn.Module):
         #x = self.linear_1(x)
         x = self.relu(x)
         x = self.linear_2(x)
-        #x = self.relu(x)
-        #x = self.linear_3(x)
+        x = self.relu(x)
+        x = self.linear_3(x)
         #x = self.tanh(x)# * 2  # find a better final activation function
 
         return x
