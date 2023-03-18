@@ -49,13 +49,15 @@ class DQN:
         discount: float,
         momentum: float,
         learning_rate: float,
+        device: str,
     ) -> None:
         self.string_length = string_length
         self.discount = discount
         self.momentum = momentum
+        self.device = device
 
-        self.query_network = BinaryStringModel(string_length=string_length)
-        self.target_network = BinaryStringModel(string_length=string_length)
+        self.query_network = BinaryStringModel(string_length=string_length).to(self.device)
+        self.target_network = BinaryStringModel(string_length=string_length).to(self.device)
         for param in self.target_network.parameters():
             param.requires_grad = False
         self.update_target_network(1.0)
@@ -89,9 +91,9 @@ class DQN:
         states = torch.vstack([replay.state for replay in batch])
         goals = torch.vstack([replay.goal for replay in batch])
         actions = torch.vstack([replay.action for replay in batch])
-        rewards = torch.tensor([replay.reward for replay in batch])
+        rewards = torch.tensor([replay.reward for replay in batch], device=self.device)
         next_states = torch.vstack([replay.next_state for replay in batch])
-        is_finisheds = torch.tensor([replay.is_finished for replay in batch])
+        is_finisheds = torch.tensor([replay.is_finished for replay in batch], device=self.device)
 
         # compute target values
         with torch.no_grad():

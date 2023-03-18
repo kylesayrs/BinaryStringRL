@@ -18,7 +18,7 @@ def train(dqn: DQN, policy: Policy, config: Config):
     num_steps_needed = []
 
     for _ in tqdm.tqdm(range(config.NUM_EPISODES)):
-        environment = BitStringEnvironment(config.STRING_LENGTH)
+        environment = BitStringEnvironment(config.STRING_LENGTH, config.DEVICE)
 
         num_environment_steps = 0
         while True:
@@ -97,13 +97,14 @@ def evaluate(dqn: DQN, policy: Policy, num_episodes: int):
 
 
 if __name__ == "__main__":
-    config = Config()
+    config = Config(device="cpu")
 
     dqn = DQN(
         config.STRING_LENGTH,
         config.DISCOUNT,
         config.DQN_MOMENTUM,
         config.LEARNING_RATE,
+        config.DEVICE,
     )
     policy = EGreedyPolicyWithDelta(config.POLICY_EPSILON, config.POLICY_EPSILON_DELTA)
 

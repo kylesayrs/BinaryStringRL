@@ -2,9 +2,9 @@ import torch
 
 
 class BitStringEnvironment:
-    def __init__(self, string_length: int) -> None:
-        self.state = torch.randint(0, 2, size=(string_length, ), dtype=torch.int8)
-        self.goal = torch.randint(0, 2, size=(string_length, ), dtype=torch.int8)
+    def __init__(self, string_length: int, device: str) -> None:
+        self.state = torch.randint(0, 2, size=(string_length, ), dtype=torch.int8, device=device)
+        self.goal = torch.randint(0, 2, size=(string_length, ), dtype=torch.int8, device=device)
 
 
     def get_state_and_goal(self):
