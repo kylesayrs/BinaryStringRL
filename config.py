@@ -19,6 +19,7 @@ class Config:
 
     # logging
     LOGGING_RATE: int = 10
+    NUM_EVAL_EPISODES: int = 500
 
 
     def __init__(self) -> None:

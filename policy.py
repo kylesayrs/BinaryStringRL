@@ -1,8 +1,18 @@
+from abc import ABC
 import torch
 import numpy
 
 
-class EGreedyPolicy:
+class Policy(ABC):
+    def get_action(self, dqn, state: torch.Tensor, goal: torch.Tensor):
+        raise NotImplementedError()
+    
+
+    def step(self):
+        pass
+
+
+class EGreedyPolicy(Policy):
     def __init__(self, epsilon: float) -> None:
         self.epsilon = epsilon
 
@@ -10,7 +20,8 @@ class EGreedyPolicy:
     def get_action(self, dqn, state: torch.Tensor, goal: torch.Tensor):
         action_qualities = dqn.infer_single(state, goal)
         max_quality_action_index = torch.argmax(action_qualities)
-        print(f"action_qualities: {action_qualities}: {max_quality_action_index} : {self.epsilon}")
+        #print(f"state: {state}")
+        #print(f"action_qualities: {action_qualities}: {max_quality_action_index} : {self.epsilon}")
 
         # epsilon chance of picking the greedy choice
         if numpy.random.choice([True, False], p=[self.epsilon, 1 - self.epsilon]):
