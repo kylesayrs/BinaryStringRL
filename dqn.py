@@ -11,12 +11,11 @@ class BinaryStringModel(torch.nn.Module):
         
         self.string_length = string_length
 
-        self.linear_0 = torch.nn.Linear(2 * self.string_length, 2 * self.string_length)
-        self.linear_1 = torch.nn.Linear(2 * self.string_length, 2 * self.string_length)
-        self.linear_2 = torch.nn.Linear(2 * self.string_length, self.string_length)
+        self.linear_0 = torch.nn.Linear(2 * self.string_length, 2 * self.string_length, bias=False)
+        self.linear_1 = torch.nn.Linear(2 * self.string_length, self.string_length)
+        self.linear_2 = torch.nn.Linear(self.string_length, self.string_length)
         self.linear_3 = torch.nn.Linear(self.string_length, self.string_length)
         self.linear_4 = torch.nn.Linear(self.string_length, self.string_length)
-        self.linear_5 = torch.nn.Linear(self.string_length, self.string_length)
 
         self.relu = torch.nn.ReLU()
 
@@ -36,12 +35,10 @@ class BinaryStringModel(torch.nn.Module):
         x = self.linear_1(x)
         x = self.relu(x)
         x = self.linear_2(x)
-        x = self.relu(x)
-        x = self.linear_3(x)
-        x = self.relu(x)
-        x = self.linear_4(x)
-        x = self.relu(x)
-        x = self.linear_5(x)
+        #x = self.relu(x)
+        #x = self.linear_3(x)
+        #x = self.relu(x)
+        #x = self.linear_4(x)
 
         return x
 
@@ -50,13 +47,13 @@ class DQN:
     def __init__(
         self,
         string_length: int,
-        discount: float,
+        gamma: float,
         momentum: float,
         learning_rate: float,
         device: str,
     ) -> None:
         self.string_length = string_length
-        self.discount = discount
+        self.gamma = gamma
         self.momentum = momentum
         self.device = device
 
@@ -107,7 +104,7 @@ class DQN:
             is_not_finished_transposed = torch.transpose(is_not_finished.unsqueeze(0), 0, 1)
             future_action_qualities *= is_not_finished_transposed  # zero if finished
 
-            target_values = rewards + self.discount * torch.max(future_action_qualities, dim=1).values
+            target_values = rewards + self.gamma * torch.max(future_action_qualities, dim=1).values
             action_indices = (actions == 1)
         
         # optimize
