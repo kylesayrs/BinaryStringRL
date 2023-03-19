@@ -6,6 +6,7 @@ from environment import BitStringEnvironment
 from policy import Policy, EGreedyPolicy, StrictlyGreedyPolicy
 from dqn import DQN
 from replay import Replay, CircularBuffer
+from her import create_proximal_goal_replays
 
 
 def train(dqn: DQN, policy: Policy, config: Config):
@@ -40,6 +41,16 @@ def train(dqn: DQN, policy: Policy, config: Config):
                 is_finished=environment.is_finished()
             )
             replay_buffer.enqueue(replay)
+
+            # HER: add replays with virtual goals
+            if config.HER_ENABLED:
+                additional_replays = create_proximal_goal_replays(
+                    replay,
+                    reward_function=BitStringEnvironment.reward_function,
+                    is_finished_function=BitStringEnvironment.is_finished_function,
+                    max_distance=config.HER_MAX_DISTANCE
+                )
+                replay_buffer.enqueue_multiple(additional_replays)
 
             # optimize dqn and policy
             batch = numpy.random.choice(replay_buffer.to_list(), config.BATCH_SIZE)
