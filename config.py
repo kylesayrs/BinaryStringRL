@@ -3,26 +3,26 @@ from pydantic import BaseModel, Field, validator
 
 class Config(BaseModel):
     # environment
-    STRING_LENGTH: int = Field(default=7)
+    STRING_LENGTH: int = Field(default=5)
 
     # policy
-    POLICY_EPSILON: float = Field(default=0.8)
+    POLICY_EPSILON: float = Field(default=0.7)
     POLICY_EPSILON_DELTA: float = Field(default=0.00)
 
     # simulation
     NUM_EPISODES: int = Field(default=5000)
-    MAX_EPISODE_STEPS: int = Field(default=15)
+    MAX_EPISODE_STEPS: int = Field(default=30)
     REPLAY_BUFFER_SIZE: int = Field(default=256)
 
     # HER
     HER_ENABLED: bool = Field(default=True)
-    HER_MAX_DISTANCE: int = Field(default=1)
+    HER_MAX_DISTANCE: int = Field(default=0)
 
     # optimization
     LEARNING_RATE: float = Field(default=0.03)
     BATCH_SIZE: int = Field(default=32)
     DISCOUNT: float = Field(default=0.8)  # coefficient on future q values
-    DQN_MOMENTUM: float = Field(default=0.55)
+    DQN_MOMENTUM: float = Field(default=0.52)
 
     # logging
     VERBOSITY: int = Field(

@@ -15,9 +15,10 @@ class BinaryStringModel(torch.nn.Module):
         self.linear_1 = torch.nn.Linear(2 * self.string_length, 2 * self.string_length)
         self.linear_2 = torch.nn.Linear(2 * self.string_length, self.string_length)
         self.linear_3 = torch.nn.Linear(self.string_length, self.string_length)
+        self.linear_4 = torch.nn.Linear(self.string_length, self.string_length)
+        self.linear_5 = torch.nn.Linear(self.string_length, self.string_length)
 
         self.relu = torch.nn.ReLU()
-        self.tanh = torch.nn.Tanh()
 
 
     def forward(self, state: torch.Tensor, goal: torch.Tensor):
@@ -37,7 +38,10 @@ class BinaryStringModel(torch.nn.Module):
         x = self.linear_2(x)
         x = self.relu(x)
         x = self.linear_3(x)
-        #x = self.tanh(x) * 2  # find a better final activation function
+        x = self.relu(x)
+        x = self.linear_4(x)
+        x = self.relu(x)
+        x = self.linear_5(x)
 
         return x
 
@@ -119,16 +123,5 @@ class DQN:
         loss = self.criterion(targets, outputs)
         loss.backward()
         self.optimizer.step()
-
-        """
-        with torch.no_grad():
-            results = self.query_network(states, goals)
-            print(f"outputs: {outputs}")
-            print(f"targets: {targets}")
-            print(f"results: {results}")
-            print()
-        """
-
-        self.update_target_network()
 
         return loss.item()

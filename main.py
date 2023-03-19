@@ -68,6 +68,8 @@ def train(dqn: DQN, policy: Policy, config: Config):
             # increment
             num_environment_steps += 1
 
+        dqn.update_target_network()
+
         num_steps_needed.append(num_environment_steps)
         
         if config.VERBOSITY >= 1:
@@ -144,5 +146,9 @@ if __name__ == "__main__":
     # evaluate (TODO: evaluate with other policies such as weighted probability)
     eval_metrics = evaluate(dqn, StrictlyGreedyPolicy(), config)
 
-    plt.hist(eval_metrics["num_steps"], bins=range(max(eval_metrics["num_steps"]) + 1))
+    _max_num_steps = max(eval_metrics["num_steps"])
+    num_solved = len([None for num_steps in eval_metrics["num_steps"] if num_steps == _max_num_steps])
+    print(f"{100 * num_solved / len(eval_metrics['num_steps']):3f}% solved")
+
+    plt.hist(eval_metrics["num_steps"], bins=range(_max_num_steps + 1))
     plt.show()
