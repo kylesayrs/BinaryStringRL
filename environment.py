@@ -1,4 +1,5 @@
 import torch
+from termcolor import colored
 
 
 class BitStringEnvironment:
@@ -29,4 +30,11 @@ class BitStringEnvironment:
     
 
     def __str__(self) -> str:
-        return f"Environment(state={self.state}, goal={self.goal})"
+        return "".join([
+            (
+                colored(str(int(state_bit)), "green")
+                if state_bit == goal_bit else
+                colored(str(int(state_bit)), "red")
+            )
+            for state_bit, goal_bit in zip(self.state, self.goal)
+        ])

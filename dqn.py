@@ -31,8 +31,8 @@ class BinaryStringModel(torch.nn.Module):
 
         # network
         x = self.linear_0(x)
-        #x = self.relu(x)
-        #x = self.linear_1(x)
+        x = self.relu(x)
+        x = self.linear_1(x)
         x = self.relu(x)
         x = self.linear_2(x)
         x = self.relu(x)

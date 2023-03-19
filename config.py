@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, validator
 
 class Config(BaseModel):
     # environment
-    STRING_LENGTH: int = Field(default=5)
+    STRING_LENGTH: int = Field(default=7)
 
     # policy
     POLICY_EPSILON: float = Field(default=0.7)
@@ -11,7 +11,7 @@ class Config(BaseModel):
 
     # simulation
     NUM_EPISODES: int = Field(default=5000)
-    MAX_EPISODE_STEPS: int = Field(default=50)
+    MAX_EPISODE_STEPS: int = Field(default=500)
     REPLAY_BUFFER_SIZE: int = Field(default=128)
 
     # optimization
@@ -21,6 +21,7 @@ class Config(BaseModel):
     DQN_MOMENTUM: float = Field(default=0.7)
 
     # logging
+    VERBOSITY: int = Field(default=1)
     LOGGING_RATE: int = Field(default=10)
     NUM_EVAL_EPISODES: int = Field(default=500)
 
@@ -31,4 +32,3 @@ class Config(BaseModel):
     @validator("BATCH_SIZE")
     def batch_size_less_than_replay_buffer(cls, value):
         assert value <= cls.REPLAY_BUFFER_SIZE
-

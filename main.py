@@ -1,4 +1,3 @@
-import tqdm
 import numpy
 import matplotlib.pyplot as plt
 
@@ -16,20 +15,17 @@ def train(dqn: DQN, policy: Policy, config: Config):
     losses = []
     num_steps_needed = []
 
-    for _ in tqdm.tqdm(range(config.NUM_EPISODES)):
+    for episode_i in range(config.NUM_EPISODES):
         environment = BitStringEnvironment(config.STRING_LENGTH, config.DEVICE)
+        if config.VERBOSITY >= 2: print(environment, end="")
 
         num_environment_steps = 0
-        while True:
-            # check for end of episode
-            if environment.is_finished() or num_environment_steps >= config.MAX_EPISODE_STEPS:
-                num_steps_needed.append(num_environment_steps)
-                break
-
+        while not environment.is_finished() and num_environment_steps < config.MAX_EPISODE_STEPS:
             # do action in environment
             state, goal = environment.get_state_and_goal()
             action = policy.get_action(dqn, state, goal)
             next_state, reward = environment.perform_action(action)
+            if config.VERBOSITY >= 2: print("\r" + str(environment), end="")
 
             # save replay of action
             replay = Replay(
@@ -58,6 +54,13 @@ def train(dqn: DQN, policy: Policy, config: Config):
             # increment
             num_environment_steps += 1
 
+        if config.VERBOSITY >= 1:
+            print("\r" + str(environment), end="")
+            print(
+                f" | {num_environment_steps:3d} / {config.MAX_EPISODE_STEPS:3d}"
+                f" | {episode_i} / {config.NUM_EPISODES}"
+            )
+
     metrics = {
         "loss": losses,
         "num_steps": num_steps_needed,
@@ -66,11 +69,12 @@ def train(dqn: DQN, policy: Policy, config: Config):
     return dqn, policy, metrics
 
 
-def evaluate(dqn: DQN, policy: Policy, num_episodes: int):
+def evaluate(dqn: DQN, policy: Policy, config: Config):
     num_steps_needed = []
 
-    for _ in tqdm.tqdm(range(num_episodes)):
+    for episode_i in range(config.NUM_EVAL_EPISODES):
         environment = BitStringEnvironment(config.STRING_LENGTH, config.DEVICE)
+        if config.VERBOSITY >= 2: print(environment, end="")
 
         num_environment_steps = 0
         while True:
@@ -83,9 +87,17 @@ def evaluate(dqn: DQN, policy: Policy, num_episodes: int):
             state, goal = environment.get_state_and_goal()
             action = policy.get_action(dqn, state, goal)
             _, _ = environment.perform_action(action)
+            if config.VERBOSITY >= 2: print("\r" + str(environment), end="")
 
             # increment
             num_environment_steps += 1
+
+        if config.VERBOSITY >= 1:
+            print("\r" + str(environment), end="")
+            print(
+                f" | {num_environment_steps:3d} / {config.MAX_EPISODE_STEPS:3d}"
+                f" | {episode_i} / {config.NUM_EVAL_EPISODES}"
+            )
 
     metrics = {
         "num_steps": num_steps_needed,
@@ -95,7 +107,7 @@ def evaluate(dqn: DQN, policy: Policy, num_episodes: int):
 
 
 if __name__ == "__main__":
-    config = Config(device="cpu")
+    config = Config(device="mps")
 
     dqn = DQN(
         config.STRING_LENGTH,
@@ -114,8 +126,7 @@ if __name__ == "__main__":
     plt.show()
 
     # evaluate
-    eval_metrics = evaluate(dqn, StrictlyGreedyPolicy(), num_episodes=config.NUM_EVAL_EPISODES)
+    eval_metrics = evaluate(dqn, StrictlyGreedyPolicy(), config)
 
-    print(eval_metrics)
-    plt.hist(eval_metrics["num_steps"])
+    plt.hist(eval_metrics["num_steps"], bins=range(max(eval_metrics["num_steps"]) + 1))
     plt.show()
