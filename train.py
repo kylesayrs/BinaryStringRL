@@ -9,14 +9,11 @@ from her import create_proximal_goal_replays
 
 def train(dqn: DQN, policy: Policy, config: Config):
     replay_buffer = CircularBuffer(config.REPLAY_BUFFER_SIZE)
-    batch_counter = 0
-    cumulative_loss = 0.0
-    losses = [0.0]  # dumb solution
+    losses = []
     num_steps_needed = []
 
     for episode_i in range(config.NUM_EPISODES):
         environment = BitStringEnvironment(config.STRING_LENGTH, config.DEVICE)
-        if config.VERBOSITY >= 2: print(environment, end="")
 
         num_environment_steps = 0
         while (
@@ -25,9 +22,8 @@ def train(dqn: DQN, policy: Policy, config: Config):
         ):
             # do action in environment
             state, goal = environment.get_state_and_goal()
-            action = policy.get_action(dqn, state, goal)
+            action = policy.get_action(dqn, state, goal, network="query")
             next_state, reward = environment.perform_action(action)
-            if config.VERBOSITY >= 3: print("\r" + str(environment), end="")
 
             # save replay of action
             replay = Replay(
@@ -50,40 +46,41 @@ def train(dqn: DQN, policy: Policy, config: Config):
                 )
                 replay_buffer.enqueue_multiple(additional_replays)
 
-            # optimize dqn
-            batch = numpy.random.choice(replay_buffer.to_list(), config.BATCH_SIZE)
-            loss_value = dqn.step_batch(batch)
-            cumulative_loss += loss_value
-
+            # increment
             num_environment_steps += 1
-            batch_counter += 1
 
-            # logging
-            if batch_counter >= config.LOGGING_RATE:
-                losses.append(cumulative_loss / config.LOGGING_RATE)
-                cumulative_loss = 0.0
-                batch_counter = 0
+        # cycle: perform optimization
+        if episode_i % config.EPISODES_PER_CYCLE == 0:
 
-        # per episode updates
-        policy.step()
-        dqn.update_target_network()
+            cumulative_loss = 0.0
+            for _ in range(config.BATCHES_PER_CYCLE):
+                batch = numpy.random.choice(replay_buffer.to_list(), config.BATCH_SIZE)
+                dqn_loss = dqn.step_batch(batch)
+
+                policy.step()
+
+                cumulative_loss += dqn_loss.item()
+
+            dqn.update_target_network(config.DQN_MOMENTUM)
+            losses.append(cumulative_loss)
+            #losses.append(cumulative_loss / config.BATCH_SIZE / config.BATCHES_PER_CYCLE)
         
         # logging
-        if config.VERBOSITY >= 1:
-            print("\r" + str(environment), end="")
-            print(
-                f" | {num_environment_steps:3d} / {config.MAX_EPISODE_STEPS:3d}"
-                f" | {episode_i} / {config.NUM_EPISODES}"
-            , end="")
+        if episode_i % config.LOGGING_RATE == 0:
+            if config.VERBOSITY >= 1:
+                print("\r" + str(environment), end="")
+                print(
+                    f" | {num_environment_steps:3d} / {config.MAX_EPISODE_STEPS:3d}"
+                    f" | {episode_i} / {config.NUM_EPISODES}"
+                , end="")
 
-        if config.VERBOSITY >= 2:
-            print(
-                f" | loss: {losses[-1]:.3f}"
-                f" | epsilon: {policy.epsilon:.2f}"
-            , end="")
+            if config.VERBOSITY >= 2:
+                print(
+                    f" | loss: {losses[-1]:.6f}"
+                , end="")
 
-        if config.VERBOSITY > 0:
-            print()
+            if config.VERBOSITY > 0:
+                print()
 
         num_steps_needed.append(num_environment_steps)
 
@@ -110,7 +107,7 @@ def evaluate(dqn: DQN, policy: Policy, config: Config):
         ):
             # do action in environment
             state, goal = environment.get_state_and_goal()
-            action = policy.get_action(dqn, state, goal)
+            action = policy.get_action(dqn, state, goal, network="target")
             _, _ = environment.perform_action(action)
             if config.VERBOSITY >= 2: print("\r" + str(environment), end="")
 
@@ -121,12 +118,13 @@ def evaluate(dqn: DQN, policy: Policy, config: Config):
         if environment.is_finished():
             num_solved += 1
 
-        if config.VERBOSITY >= 1:
-            print("\r" + str(environment), end="")
-            print(
-                f" | {num_environment_steps:3d} / {config.STRING_LENGTH:3d}"
-                f" | {episode_i} / {config.NUM_EVAL_EPISODES}"
-            )
+        if episode_i % config.LOGGING_RATE == 0:
+            if config.VERBOSITY >= 1:
+                print("\r" + str(environment), end="")
+                print(
+                    f" | {num_environment_steps:3d} / {config.STRING_LENGTH:3d}"
+                    f" | {episode_i} / {config.NUM_EVAL_EPISODES}"
+                )
 
     metrics = {
         "num_steps": num_steps_needed,

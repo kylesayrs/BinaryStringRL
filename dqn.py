@@ -11,11 +11,10 @@ class BinaryStringModel(torch.nn.Module):
         
         self.string_length = string_length
 
-        self.linear_0 = torch.nn.Linear(2 * self.string_length, 2 * self.string_length, bias=False)
+        self.linear_0 = torch.nn.Linear(2 * self.string_length, 2 * self.string_length)
         self.linear_1 = torch.nn.Linear(2 * self.string_length, self.string_length)
         self.linear_2 = torch.nn.Linear(self.string_length, self.string_length)
         self.linear_3 = torch.nn.Linear(self.string_length, self.string_length)
-        self.linear_4 = torch.nn.Linear(self.string_length, self.string_length)
 
         self.relu = torch.nn.ReLU()
 
@@ -35,10 +34,35 @@ class BinaryStringModel(torch.nn.Module):
         x = self.linear_1(x)
         x = self.relu(x)
         x = self.linear_2(x)
-        #x = self.relu(x)
-        #x = self.linear_3(x)
-        #x = self.relu(x)
-        #x = self.linear_4(x)
+        x = self.relu(x)
+        x = self.linear_3(x)
+
+        return x
+
+
+class BinaryStringModelHidden(torch.nn.Module):
+    def __init__(self, string_length: int) -> None:
+        super().__init__()
+        
+        self.string_length = string_length
+        self._hidden_size = 256  # as specificed in HER paper
+
+        self.linear_0 = torch.nn.Linear(2 * self.string_length, self._hidden_size)
+        self.linear_1 = torch.nn.Linear(self._hidden_size, self.string_length)
+
+
+    def forward(self, state: torch.Tensor, goal: torch.Tensor):
+        assert len(state.shape) == 2, "BinaryStringModel forward must receive batch"
+        assert len(goal.shape) == 2, "BinaryStringModel forward must receive batch"
+        assert state.shape[1] == goal.shape[1], "Number of states != Number of goals"
+
+        # preprocessing
+        x = torch.concat([state, goal], dim=1)
+        x = x.to(torch.float32)
+
+        # network
+        x = self.linear_0(x)
+        x = self.linear_1(x)
 
         return x
 
@@ -48,13 +72,11 @@ class DQN:
         self,
         string_length: int,
         gamma: float,
-        momentum: float,
         learning_rate: float,
         device: str,
     ) -> None:
         self.string_length = string_length
         self.gamma = gamma
-        self.momentum = momentum
         self.device = device
 
         self.query_network = BinaryStringModel(string_length=string_length).to(self.device)
@@ -68,22 +90,27 @@ class DQN:
         self.criterion = torch.nn.MSELoss()
 
 
-    def infer_single(self, state: torch.Tensor, goal: torch.Tensor):
+    def infer_single(self, state: torch.Tensor, goal: torch.Tensor, network: str = "query"):
+        assert network in ["query", "target"]
+
         with torch.no_grad():
             input = (state.unsqueeze(0), goal.unsqueeze(0))
-            return self.query_network(*input)[0]
+
+            if network == "query":
+                return self.query_network(*input)[0]
+
+            else:
+                return self.target_network(*input)[0]
     
 
-    def update_target_network(self, momentum=None):
-        momentum = self.momentum if momentum is None else momentum
-
+    def update_target_network(self, momentum: int):
         with torch.no_grad():
             for query_param, target_param in zip(
                 self.query_network.parameters(), self.target_network.parameters()
             ):
                 target_param.data = (
-                    self.momentum * query_param.data +
-                    (1 - self.momentum) * target_param.data
+                    momentum * query_param.data +
+                    (1 - momentum) * target_param.data
                 )
 
 
@@ -107,7 +134,7 @@ class DQN:
             target_values = rewards + self.gamma * torch.max(future_action_qualities, dim=1).values
             action_indices = (actions == 1)
         
-        # optimize
+        # optimize TODO: Pull this out and return (outputs, targets)
         self.optimizer.zero_grad()
         outputs = self.query_network(states, goals)
         
@@ -121,4 +148,4 @@ class DQN:
         loss.backward()
         self.optimizer.step()
 
-        return loss.item()
+        return loss

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 from config import Config
-from policy import EGreedyPolicyWithDelta, StrictlyGreedyPolicy
+from policy import create_policy_from_config, StrictlyGreedyPolicy
 from dqn import DQN
 from train import train, evaluate
 
@@ -12,14 +12,10 @@ if __name__ == "__main__":
     dqn = DQN(
         config.STRING_LENGTH,
         config.GAMMA,
-        config.DQN_MOMENTUM,
         config.LEARNING_RATE,
         config.DEVICE,
     )
-    policy = EGreedyPolicyWithDelta(
-        config.POLICY_EPSILON,
-        (config.POLICY_EPSILON_MAX - config.POLICY_EPSILON) / config.NUM_EPISODES
-    )
+    policy = create_policy_from_config(config)
 
     # train
     dqn, policy, train_metrics = train(dqn, policy, config)
