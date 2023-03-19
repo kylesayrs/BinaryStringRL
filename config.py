@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, validator
 
 class Config(BaseModel):
     # environment
-    STRING_LENGTH: int = Field(default=7)
+    STRING_LENGTH: int = Field(default=3)
 
     # policy
     POLICY_EPSILON: float = Field(default=0.7)

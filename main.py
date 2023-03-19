@@ -20,7 +20,10 @@ def train(dqn: DQN, policy: Policy, config: Config):
         if config.VERBOSITY >= 2: print(environment, end="")
 
         num_environment_steps = 0
-        while not environment.is_finished() and num_environment_steps < config.MAX_EPISODE_STEPS:
+        while (
+            not environment.is_finished()
+            and num_environment_steps < config.MAX_EPISODE_STEPS
+        ):
             # do action in environment
             state, goal = environment.get_state_and_goal()
             action = policy.get_action(dqn, state, goal)
@@ -39,7 +42,7 @@ def train(dqn: DQN, policy: Policy, config: Config):
             replay_buffer.enqueue(replay)
 
             # optimize dqn and policy
-            batch = numpy.random.choice(replay_buffer.to_list(), config.BATCH_SIZE, replace=True)
+            batch = numpy.random.choice(replay_buffer.to_list(), config.BATCH_SIZE)
             loss_value = dqn.step_batch(batch)
             cumulative_loss += loss_value
 
@@ -54,6 +57,8 @@ def train(dqn: DQN, policy: Policy, config: Config):
             # increment
             num_environment_steps += 1
 
+        num_steps_needed.append(num_environment_steps)
+        
         if config.VERBOSITY >= 1:
             print("\r" + str(environment), end="")
             print(
@@ -77,12 +82,10 @@ def evaluate(dqn: DQN, policy: Policy, config: Config):
         if config.VERBOSITY >= 2: print(environment, end="")
 
         num_environment_steps = 0
-        while True:
-            # check for end of episode
-            if environment.is_finished() or num_environment_steps >= config.MAX_EPISODE_STEPS:
-                num_steps_needed.append(num_environment_steps)
-                break
-
+        while (
+            not environment.is_finished()
+            and num_environment_steps < config.MAX_EPISODE_STEPS
+        ):
             # do action in environment
             state, goal = environment.get_state_and_goal()
             action = policy.get_action(dqn, state, goal)
@@ -91,6 +94,8 @@ def evaluate(dqn: DQN, policy: Policy, config: Config):
 
             # increment
             num_environment_steps += 1
+
+        num_steps_needed.append(num_environment_steps)
 
         if config.VERBOSITY >= 1:
             print("\r" + str(environment), end="")
@@ -125,7 +130,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.show()
 
-    # evaluate
+    # evaluate (TODO: evaluate with other policies such as weighted probability)
     eval_metrics = evaluate(dqn, StrictlyGreedyPolicy(), config)
 
     plt.hist(eval_metrics["num_steps"], bins=range(max(eval_metrics["num_steps"]) + 1))
