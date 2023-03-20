@@ -10,41 +10,6 @@ class BinaryStringModel(torch.nn.Module):
         super().__init__()
         
         self.string_length = string_length
-
-        self.linear_0 = torch.nn.Linear(2 * self.string_length, 2 * self.string_length)
-        self.linear_1 = torch.nn.Linear(2 * self.string_length, self.string_length)
-        self.linear_2 = torch.nn.Linear(self.string_length, self.string_length)
-        self.linear_3 = torch.nn.Linear(self.string_length, self.string_length)
-
-        self.relu = torch.nn.ReLU()
-
-
-    def forward(self, state: torch.Tensor, goal: torch.Tensor):
-        assert len(state.shape) == 2, "BinaryStringModel forward must receive batch"
-        assert len(goal.shape) == 2, "BinaryStringModel forward must receive batch"
-        assert state.shape[1] == goal.shape[1], "Number of states != Number of goals"
-
-        # preprocessing
-        x = torch.concat([state, goal], dim=1)
-        x = x.to(torch.float32)
-
-        # network
-        x = self.linear_0(x)
-        x = self.relu(x)
-        x = self.linear_1(x)
-        x = self.relu(x)
-        x = self.linear_2(x)
-        x = self.relu(x)
-        x = self.linear_3(x)
-
-        return x
-
-
-class BinaryStringModelHidden(torch.nn.Module):
-    def __init__(self, string_length: int) -> None:
-        super().__init__()
-        
-        self.string_length = string_length
         self._hidden_size = 256  # as specificed in HER paper
 
         self.linear_0 = torch.nn.Linear(2 * self.string_length, self._hidden_size)
@@ -82,14 +47,13 @@ class DQN:
         self.gamma = gamma
         self.device = device
 
-        self.query_network = BinaryStringModelHidden(string_length=string_length).to(self.device)
-        self.target_network = BinaryStringModelHidden(string_length=string_length).to(self.device)
+        self.query_network = BinaryStringModel(string_length=string_length).to(self.device)
+        self.target_network = BinaryStringModel(string_length=string_length).to(self.device)
         for param in self.target_network.parameters():
             param.requires_grad = False
         self.update_target_network(1.0)
 
-        #self.optimizer = torch.optim.Adam(self.query_network.parameters(), lr=learning_rate)
-        self.optimizer = torch.optim.SGD(self.query_network.parameters(), lr=learning_rate)
+        self.optimizer = torch.optim.Adam(self.query_network.parameters(), lr=learning_rate)
         self.criterion = torch.nn.MSELoss()
 
 
@@ -137,7 +101,7 @@ class DQN:
             target_values = rewards + self.gamma * torch.max(future_action_qualities, dim=1).values
             action_indices = (actions == 1)
         
-        # optimize TODO: Pull this out and return (outputs, targets)
+        # optimize
         self.optimizer.zero_grad()
         outputs = self.query_network(states, goals)
         

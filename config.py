@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, validator
 
 class Config(BaseModel):
     # environment
-    STRING_LENGTH: int = Field(default=20)
+    STRING_LENGTH: int = Field(default=25)
 
     # policy
     POLICY_TYPE: str = Field(default="EGreedyPolicy")  # HER: EGreedyPolicyWithNoise
@@ -12,8 +12,8 @@ class Config(BaseModel):
     POLICY_NOISE_STD: float = Field(default=None)  # HER: 0.05
 
     # simulation
-    NUM_EPISODES: int = Field(default=50000)  # HER: 160000 = 16 episodes * 50 cycles * 200 epochs
-    MAX_EPISODE_STEPS: int = Field(default=20)  # HER: STRING_LENGTH
+    NUM_EPISODES: int = Field(default=160_000)  # HER: 160_000 = 16 episodes * 50 cycles * 200 epochs
+    MAX_EPISODE_STEPS: int = Field(default=25)  # HER: STRING_LENGTH
     REPLAY_BUFFER_SIZE: int = Field(default=1024)  # HER: 1_000_000
 
     # HER
@@ -21,7 +21,7 @@ class Config(BaseModel):
     HER_MAX_DISTANCE: int = Field(default=0)
 
     # optimization
-    LEARNING_RATE: float = Field(default=0.12)  # HER: 0.001
+    LEARNING_RATE: float = Field(default=0.001)  # HER: 0.001
     EPISODES_PER_CYCLE: int = Field(default=16)  # HER: 16
     BATCHES_PER_CYCLE: int = Field(default=40)  # HER: 40
     BATCH_SIZE: int = Field(default=128)  # HER: 128
@@ -57,4 +57,4 @@ class Config(BaseModel):
 
     @validator("MAX_EPISODE_STEPS")
     def episode_steps_greater_than_string_length(cls, value):
-        assert False#value >= cls.STRING_LENGTH
+        assert value >= cls.STRING_LENGTH

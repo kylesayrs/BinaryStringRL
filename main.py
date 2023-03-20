@@ -7,7 +7,7 @@ from train import train, evaluate
 
 
 if __name__ == "__main__":
-    config = Config(device="mps")
+    config = Config(DEVICE="cpu")
 
     dqn = DQN(
         config.STRING_LENGTH,
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.show()
 
-    # evaluate (TODO: evaluate with other policies such as weighted probability)
+    # evaluate
     eval_metrics = evaluate(dqn, StrictlyGreedyPolicy(), config)
 
     print(f"{100 * eval_metrics['num_solved'] / len(eval_metrics['num_steps']):.2f}% solved")

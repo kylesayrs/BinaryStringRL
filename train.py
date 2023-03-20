@@ -108,7 +108,6 @@ def evaluate(dqn: DQN, policy: Policy, config: Config):
             state, goal = environment.get_state_and_goal()
             action = policy.get_action(dqn, state, goal, network="target")
             _, _ = environment.perform_action(action)
-            if config.VERBOSITY >= 2: print("\r" + str(environment), end="")
 
             # increment
             num_environment_steps += 1
@@ -119,7 +118,7 @@ def evaluate(dqn: DQN, policy: Policy, config: Config):
 
         if episode_i % config.LOGGING_RATE == 0:
             if config.VERBOSITY >= 1:
-                print("\r" + str(environment), end="")
+                print(environment, end="")
                 print(
                     f" | {num_environment_steps:3d} / {config.STRING_LENGTH:3d}"
                     f" | {episode_i} / {config.NUM_EVAL_EPISODES}"
