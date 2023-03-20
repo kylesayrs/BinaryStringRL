@@ -14,13 +14,13 @@ GOAL: [0 1 1]
 STRING: [1 0 1] -> [0 0 1] -> [0 1 1]
 ```
 
-With some domain knowledge, an implementer could create a shaped reward function that rewards an agent for taking actions that move the string closer to its goal (such as a norm function). However not all tasks have known or rewards capapble of being smoothly shaped for an agent. In [HER](https://arxiv.org/pdf/1707.01495.pdf) the authors consider the case in which the rewards are sparse: `+1` reward if the strings match exactly, `-1` reward otherwise.
+With some domain knowledge, an implementer could create a shaped reward function that rewards an agent for taking actions that move the string closer to its goal (such as a norm function). However not all tasks have known or rewards capable of being smoothly shaped for an agent. In [HER](https://arxiv.org/pdf/1707.01495.pdf) the authors consider the case in which the rewards are sparse: `+1` reward if the strings match exactly, `-1` reward otherwise.
 
-A typical agent is not capapble of solving strings longer than 15 bits since it is statstically improbable that the agent would randomly encounter the goal enough to learn from positive rewards.
+A typical agent is not capapble of solving strings longer than 15 bits since it is statistically improbable that the agent would randomly encounter the goal enough to learn from positive rewards.
 
 ## Hindsight Experience Replay ##
 In the paper the authors propose a method of adding additional goals for each replay step added to the replay buffer. For each action, in addition to the (probably negative) reward replay, they modify the replay's goal string to be the replay's next state, resulting in a replay with a postiive positive reward. These "virtual goals" allow the agent to learn from immediate positive rewards without relying on random sampling from the environment.
 
 
 ## Results
-My results were able to replicate the authors' findings up to 30 bit strings. The authors did not include many details about the hyperparameters in their paper, so it is probable that longer strings are solvable with different parameters such as a larger replay buffer and more training episodes.
+My results were able to replicate the authors' findings up to 30 bit strings. The authors did not include many details about hyperparameters in their paper, so it is possible that longer strings are solvable with different parameters such as a larger replay buffer and more training episodes.
