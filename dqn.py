@@ -50,6 +50,8 @@ class BinaryStringModelHidden(torch.nn.Module):
         self.linear_0 = torch.nn.Linear(2 * self.string_length, self._hidden_size)
         self.linear_1 = torch.nn.Linear(self._hidden_size, self.string_length)
 
+        self.relu = torch.nn.ReLU()
+
 
     def forward(self, state: torch.Tensor, goal: torch.Tensor):
         assert len(state.shape) == 2, "BinaryStringModel forward must receive batch"
@@ -62,6 +64,7 @@ class BinaryStringModelHidden(torch.nn.Module):
 
         # network
         x = self.linear_0(x)
+        x = self.relu(x)
         x = self.linear_1(x)
 
         return x
@@ -79,8 +82,8 @@ class DQN:
         self.gamma = gamma
         self.device = device
 
-        self.query_network = BinaryStringModel(string_length=string_length).to(self.device)
-        self.target_network = BinaryStringModel(string_length=string_length).to(self.device)
+        self.query_network = BinaryStringModelHidden(string_length=string_length).to(self.device)
+        self.target_network = BinaryStringModelHidden(string_length=string_length).to(self.device)
         for param in self.target_network.parameters():
             param.requires_grad = False
         self.update_target_network(1.0)

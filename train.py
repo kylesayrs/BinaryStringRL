@@ -98,7 +98,6 @@ def evaluate(dqn: DQN, policy: Policy, config: Config):
 
     for episode_i in range(config.NUM_EVAL_EPISODES):
         environment = BitStringEnvironment(config.STRING_LENGTH, config.DEVICE)
-        if config.VERBOSITY >= 2: print(environment, end="")
 
         num_environment_steps = 0
         while (
