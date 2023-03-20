@@ -14,7 +14,7 @@ GOAL: [0 1 1]
 STRING: [1 0 1] -> [0 0 1] -> [0 1 1]
 ```
 
-With some domain knowledge, an implementer could create a shaped reward function that rewards an agent for taking actions that move the string closer to its goal (such as a norm function). However not all tasks have known or rewards capapble of being smoothly shaped for an agent. In [HER](https://arxiv.org/pdf/1707.01495.pdf) the authors consider the case in which the rewards are sparse: +1 reward if the strings match exactly, -1 reward otherwise.
+With some domain knowledge, an implementer could create a shaped reward function that rewards an agent for taking actions that move the string closer to its goal (such as a norm function). However not all tasks have known or rewards capapble of being smoothly shaped for an agent. In [HER](https://arxiv.org/pdf/1707.01495.pdf) the authors consider the case in which the rewards are sparse: `+1` reward if the strings match exactly, `-1` reward otherwise.
 
 A typical agent is not capapble of solving strings longer than 15 bits since it is statstically improbable that the agent would randomly encounter the goal enough to learn from positive rewards.
 
