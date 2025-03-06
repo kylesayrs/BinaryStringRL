@@ -1,3 +1,4 @@
+import torch
 import numpy
 
 from config import Config
@@ -7,6 +8,7 @@ from policy import Policy
 from replay import Replay, CircularBuffer
 from her import create_proximal_goal_replays
 
+
 def train(dqn: DQN, policy: Policy, config: Config):
     replay_buffer = CircularBuffer(config.REPLAY_BUFFER_SIZE)
     losses = []
@@ -15,6 +17,7 @@ def train(dqn: DQN, policy: Policy, config: Config):
     for episode_i in range(config.NUM_EPISODES):
         environment = BitStringEnvironment(config.STRING_LENGTH, config.DEVICE)
 
+        # sample replays
         num_environment_steps = 0
         while (
             not environment.is_finished()
@@ -37,7 +40,7 @@ def train(dqn: DQN, policy: Policy, config: Config):
             replay_buffer.enqueue(replay)
 
             # HER: add replays with virtual goals
-            if config.HER_ENABLED:
+            if config.HER_MAX_DISTANCE > 0:
                 additional_replays = create_proximal_goal_replays(
                     replay,
                     reward_function=BitStringEnvironment.reward_function,
@@ -67,20 +70,15 @@ def train(dqn: DQN, policy: Policy, config: Config):
         
         # logging
         if episode_i % config.LOGGING_RATE == 0:
+            eval_metrics = evaluate(dqn, policy, config)
+
             if config.VERBOSITY >= 1:
-                print("\r" + str(environment), end="")
+                print(environment, end="")
                 print(
-                    f" | {num_environment_steps:3d} / {config.MAX_EPISODE_STEPS:3d}"
-                    f" | {episode_i} / {config.NUM_EPISODES}"
-                , end="")
-
-            if config.VERBOSITY >= 2:
-                print(
-                    f" | loss: {losses[-1]:.6f}"
-                , end="")
-
-            if config.VERBOSITY > 0:
-                print()
+                    f" | solved: {eval_metrics['num_solved']:3d} / {config.NUM_EVAL_EPISODES:3d}"
+                    f" | avg len: {int(sum(eval_metrics['num_steps']) / config.NUM_EVAL_EPISODES):3d} / {config.MAX_EPISODE_STEPS:3d}"
+                    f" | train loss: {losses[-1] / config.BATCH_SIZE / config.BATCHES_PER_CYCLE:.3e}"
+                )
 
         num_steps_needed.append(num_environment_steps)
 
@@ -92,17 +90,18 @@ def train(dqn: DQN, policy: Policy, config: Config):
     return dqn, policy, metrics
 
 
+@torch.no_grad()
 def evaluate(dqn: DQN, policy: Policy, config: Config):
     num_steps_needed = []
     num_solved = 0
 
     for episode_i in range(config.NUM_EVAL_EPISODES):
-        environment = BitStringEnvironment(config.STRING_LENGTH, config.DEVICE)
+        environment = BitStringEnvironment(config.MAX_EPISODE_STEPS, config.DEVICE)
 
         num_environment_steps = 0
         while (
             not environment.is_finished()
-            and num_environment_steps < config.STRING_LENGTH
+            and num_environment_steps < config.MAX_EPISODE_STEPS
         ):
             # do action in environment
             state, goal = environment.get_state_and_goal()
@@ -116,17 +115,7 @@ def evaluate(dqn: DQN, policy: Policy, config: Config):
         if environment.is_finished():
             num_solved += 1
 
-        if episode_i % config.LOGGING_RATE == 0:
-            if config.VERBOSITY >= 1:
-                print(environment, end="")
-                print(
-                    f" | {num_environment_steps:3d} / {config.STRING_LENGTH:3d}"
-                    f" | {episode_i} / {config.NUM_EVAL_EPISODES}"
-                )
-
-    metrics = {
+    return {
         "num_steps": num_steps_needed,
         "num_solved": num_solved,
     }
-
-    return metrics

@@ -3,22 +3,21 @@ from pydantic import BaseModel, Field, validator
 
 class Config(BaseModel):
     # environment
-    STRING_LENGTH: int = Field(default=25)
+    STRING_LENGTH: int = Field(default=30)
 
     # policy
     POLICY_TYPE: str = Field(default="EGreedyPolicy")  # HER: EGreedyPolicyWithNoise
     POLICY_EPSILON: float = Field(default=0.8)  # HER: 0.8
     POLICY_EPSILON_MAX: float = Field(default=None)  # HER: None
-    POLICY_NOISE_STD: float = Field(default=None)  # HER: 0.05
+    POLICY_NOISE_STD: float = Field(default=0.05)  # HER: 0.05
 
     # simulation
     NUM_EPISODES: int = Field(default=160_000)  # HER: 160_000 = 16 episodes * 50 cycles * 200 epochs
-    MAX_EPISODE_STEPS: int = Field(default=25)  # HER: STRING_LENGTH
-    REPLAY_BUFFER_SIZE: int = Field(default=1024)  # HER: 1_000_000
+    MAX_EPISODE_STEPS: int = Field(default=30)  # HER: STRING_LENGTH
+    REPLAY_BUFFER_SIZE: int = Field(default=10_000)  # HER: 1_000_000
 
     # HER
-    HER_ENABLED: bool = Field(default=True)
-    HER_MAX_DISTANCE: int = Field(default=0)
+    HER_MAX_DISTANCE: int = Field(default=1)
 
     # optimization
     LEARNING_RATE: float = Field(default=0.001)  # HER: 0.001
@@ -39,10 +38,10 @@ class Config(BaseModel):
         ),
         default=2
     )
-    LOGGING_RATE: int = Field(description="episodes per log", default=50)
+    LOGGING_RATE: int = Field(description="episodes per log", default=5)
 
     # hardware
-    DEVICE = Field(default="cpu")
+    DEVICE: str = Field(default="cpu")
 
 
     @validator("BATCH_SIZE")

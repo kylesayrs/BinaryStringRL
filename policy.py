@@ -4,9 +4,11 @@ import numpy
 
 from config import Config
 
+from dqn import DQN
+
 
 class Policy(ABC):
-    def get_action(self, dqn, state: torch.Tensor, goal: torch.Tensor, network: str = "query") -> torch.Tensor:
+    def get_action(self, dqn: DQN, state: torch.Tensor, goal: torch.Tensor, network: str = "query") -> torch.Tensor:
         raise NotImplementedError()
     
 
@@ -19,7 +21,7 @@ class EGreedyPolicy(Policy):
         self.epsilon = epsilon
 
 
-    def get_action(self, dqn, state: torch.Tensor, goal: torch.Tensor, network: str = "query") -> torch.Tensor:
+    def get_action(self, dqn: DQN, state: torch.Tensor, goal: torch.Tensor, network: str = "query") -> torch.Tensor:
         action_qualities = dqn.infer_single(state, goal, network=network)
         max_quality_action_index = torch.argmax(action_qualities)
 
@@ -69,7 +71,7 @@ class EGreedyPolicyWithNoise(Policy):
         self.noise_std = noise_std
 
 
-    def get_action(self, dqn, state: torch.Tensor, goal: torch.Tensor, network: str = "query") -> torch.Tensor:
+    def get_action(self, dqn: DQN, state: torch.Tensor, goal: torch.Tensor, network: str = "query") -> torch.Tensor:
         action_qualities = dqn.infer_single(state, goal, network=network)
         max_quality_action_index = torch.argmax(action_qualities)
 

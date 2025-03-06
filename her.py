@@ -22,7 +22,7 @@ def create_proximal_goal_replays(
     max_distance: int
 ):
     replays = []
-    for distance in range(max_distance + 1):
+    for distance in range(max_distance):
         new_goal = _random_flip_bits(replay.next_state, distance)
 
         new_replay = replay.copy(update={

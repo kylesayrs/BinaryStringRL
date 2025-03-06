@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Tuple
 
 import torch
 from termcolor import colored
@@ -11,9 +11,10 @@ class BitStringEnvironment:
 
 
     @staticmethod
-    def reward_function(state: torch.Tensor, goal: torch.Tensor):
+    def reward_function(state: torch.Tensor, goal: torch.Tensor) -> float:
         return 1 if torch.all(state == goal) else -1
     
+
     @staticmethod
     def is_finished_function(state: torch.Tensor, goal: torch.Tensor) -> bool:
         return bool(torch.all(state == goal))
@@ -23,7 +24,7 @@ class BitStringEnvironment:
         return self.state.clone(), self.goal.clone()
 
 
-    def get_reward(self):
+    def get_reward(self) -> float:
         return self.reward_function(self.state, self.goal)
     
     
@@ -31,7 +32,7 @@ class BitStringEnvironment:
         return self.is_finished_function(self.state, self.goal)
         
 
-    def perform_action(self, action: torch.Tensor) -> float:
+    def perform_action(self, action: torch.Tensor) -> Tuple[torch.Tensor, float]:
         action_index = torch.argmax(action)
         next_state = self.state.clone()
         next_state[action_index] = 1 - next_state[action_index]
