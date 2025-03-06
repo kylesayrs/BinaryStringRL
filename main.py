@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 from config import Config
-from policy import create_policy_from_config, StrictlyGreedyPolicy
+from policy import create_policy_from_config
 from dqn import DQN
 from train import train, evaluate
 
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     plt.show()
 
     # evaluate
-    eval_metrics = evaluate(dqn, StrictlyGreedyPolicy(), config)
+    eval_metrics = evaluate(dqn, config)
 
     print(f"{100 * eval_metrics['num_solved'] / len(eval_metrics['num_steps']):.2f}% solved")
 

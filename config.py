@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, validator
 
 class Config(BaseModel):
     # environment
-    STRING_LENGTH: int = Field(default=30)
+    STRING_LENGTH: int = Field(default=15)
 
     # policy
     POLICY_TYPE: str = Field(default="EGreedyPolicy")  # HER: EGreedyPolicyWithNoise
@@ -12,9 +12,9 @@ class Config(BaseModel):
     POLICY_NOISE_STD: float = Field(default=0.05)  # HER: 0.05
 
     # simulation
-    NUM_EPISODES: int = Field(default=160_000)  # HER: 160_000 = 16 episodes * 50 cycles * 200 epochs
-    MAX_EPISODE_STEPS: int = Field(default=30)  # HER: STRING_LENGTH
-    REPLAY_BUFFER_SIZE: int = Field(default=1024)  # HER: 1_000_000
+    NUM_EPISODES: int = Field(default=4_000)  # HER: 160_000 = 16 episodes * 50 cycles * 200 epochs
+    MAX_EPISODE_STEPS: int = Field(default=15)  # HER: STRING_LENGTH
+    REPLAY_BUFFER_SIZE: int = Field(default=1024 * 4)  # HER: 1_000_000
 
     # HER
     HER_MAX_DISTANCE: int = Field(default=1)
@@ -26,11 +26,11 @@ class Config(BaseModel):
     BATCH_SIZE: int = Field(default=128)  # HER: 128
     GAMMA: float = Field(default=0.98)  # coefficient on future q values HER: 0.98
     DQN_MOMENTUM: float = Field(default=0.05)  # per cycle HER: 0.05
-    NUM_EVAL_EPISODES: int = Field(default=500)
+    NUM_EVAL_EPISODES: int = Field(default=5)
 
     # logging
     VERBOSITY: int = Field(default=1)
-    LOGGING_RATE: int = Field(description="episodes per log", default=1000)
+    LOGGING_RATE: int = Field(description="episodes per log", default=5)
 
     # hardware
     DEVICE: str = Field(default="cpu")

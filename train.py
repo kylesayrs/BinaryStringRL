@@ -4,7 +4,7 @@ import numpy
 from config import Config
 from environment import BitStringEnvironment
 from dqn import DQN
-from policy import Policy
+from policy import Policy, StrictlyGreedyPolicy
 from replay import Replay, CircularBuffer
 from her import create_proximal_goal_replays
 
@@ -70,13 +70,13 @@ def train(dqn: DQN, policy: Policy, config: Config):
         
         # logging
         if episode_i % config.LOGGING_RATE == 0:
-            eval_metrics = evaluate(dqn, policy, config)
+            eval_metrics = evaluate(dqn, config)
 
             if config.VERBOSITY >= 1:
-                print(environment, end="")
+                print(eval_metrics["sample_environment"], end="")
                 print(
                     f" | episode: {episode_i:3d} / {config.NUM_EPISODES:3d}"
-                    f" | solved: {eval_metrics['num_solved']:3d} / {config.NUM_EVAL_EPISODES:3d}"
+                    f" | eval acc: {eval_metrics['num_solved']:3d} / {config.NUM_EVAL_EPISODES:3d}"
                     # f" | avg len: {int(sum(eval_metrics['num_steps']) / config.NUM_EVAL_EPISODES):3d} / {config.MAX_EPISODE_STEPS:3d}"
                     f" | train loss: {losses[-1] / config.BATCH_SIZE / config.BATCHES_PER_CYCLE:.3e}"
                 )
@@ -92,7 +92,8 @@ def train(dqn: DQN, policy: Policy, config: Config):
 
 
 @torch.no_grad()
-def evaluate(dqn: DQN, policy: Policy, config: Config):
+def evaluate(dqn: DQN, config: Config):
+    policy = StrictlyGreedyPolicy.get_instance()
     num_steps_needed = []
     num_solved = 0
 
@@ -117,6 +118,7 @@ def evaluate(dqn: DQN, policy: Policy, config: Config):
             num_solved += 1
 
     return {
+        "sample_environment": environment,
         "num_steps": num_steps_needed,
         "num_solved": num_solved,
     }

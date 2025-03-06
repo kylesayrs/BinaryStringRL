@@ -26,7 +26,7 @@ class EGreedyPolicy(Policy):
         max_quality_action_index = torch.argmax(action_qualities)
 
         # epsilon chance of picking the greedy choice
-        if torch.rand(1).squeeze() > self.epsilon:
+        if numpy.random.choice([True, False], p=[self.epsilon, 1 - self.epsilon]):
             selected_action_index = max_quality_action_index
 
         else:
@@ -53,7 +53,16 @@ class EGreedyPolicyWithDelta(EGreedyPolicy):
 
 
 class StrictlyGreedyPolicy():
-    @torch.no_grad()
+    _instance = None
+
+    @classmethod
+    def get_instance(cls) -> "StrictlyGreedyPolicy":
+        if cls._instance is None:
+            cls._instance = cls()
+
+        return cls._instance
+
+
     def get_action(self, dqn, state: torch.Tensor, goal: torch.Tensor, network: str = "query") -> torch.Tensor:
         action_qualities = dqn.infer_single(state, goal, network=network)
         max_quality_action_index = torch.argmax(action_qualities)
@@ -72,14 +81,12 @@ class EGreedyPolicyWithNoise(Policy):
         self.noise_std = noise_std
 
 
-    @torch.no_grad()
     def get_action(self, dqn: DQN, state: torch.Tensor, goal: torch.Tensor, network: str = "query") -> torch.Tensor:
         action_qualities = dqn.infer_single(state, goal, network=network)
         max_quality_action_index = torch.argmax(action_qualities)
 
         # epsilon chance of picking the greedy choice with noise
-        # TODO
-        if torch.rand(1).squeeze() > self.epsilon:
+        if numpy.random.choice([True, False], p=[self.epsilon, 1 - self.epsilon]):
             selected_action_index = max_quality_action_index
 
             action = torch.zeros(len(action_qualities))
