@@ -14,7 +14,7 @@ class Config(BaseModel):
     # simulation
     NUM_EPISODES: int = Field(default=160_000)  # HER: 160_000 = 16 episodes * 50 cycles * 200 epochs
     MAX_EPISODE_STEPS: int = Field(default=30)  # HER: STRING_LENGTH
-    REPLAY_BUFFER_SIZE: int = Field(default=10_000)  # HER: 1_000_000
+    REPLAY_BUFFER_SIZE: int = Field(default=1024)  # HER: 1_000_000
 
     # HER
     HER_MAX_DISTANCE: int = Field(default=1)
@@ -38,7 +38,7 @@ class Config(BaseModel):
         ),
         default=2
     )
-    LOGGING_RATE: int = Field(description="episodes per log", default=5)
+    LOGGING_RATE: int = Field(description="episodes per log", default=1000)
 
     # hardware
     DEVICE: str = Field(default="cpu")

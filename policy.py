@@ -75,7 +75,7 @@ class EGreedyPolicyWithNoise(Policy):
         action_qualities = dqn.infer_single(state, goal, network=network)
         max_quality_action_index = torch.argmax(action_qualities)
 
-        # epsilon chance of picking the greedy choice
+        # epsilon chance of picking the greedy choice with noise
         if numpy.random.choice([True, False], p=[self.epsilon, 1 - self.epsilon]):
             selected_action_index = max_quality_action_index
 
@@ -84,10 +84,12 @@ class EGreedyPolicyWithNoise(Policy):
             noise = numpy.random.normal(0, self.noise_std, len(action[selected_action_index]))
             action[selected_action_index] += action[selected_action_index] * noise
 
+        # otherwise randomly choose from other actions
         else:
             other_action_indices = list(range(len(state)))
             other_action_indices.remove(max_quality_action_index)
 
+            # TODO: optimize for performance
             selected_action_index = numpy.random.choice(other_action_indices)
 
             action = torch.zeros(len(action_qualities))

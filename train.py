@@ -75,8 +75,9 @@ def train(dqn: DQN, policy: Policy, config: Config):
             if config.VERBOSITY >= 1:
                 print(environment, end="")
                 print(
+                    f" | episode: {episode_i:3d} / {config.NUM_EPISODES:3d}"
                     f" | solved: {eval_metrics['num_solved']:3d} / {config.NUM_EVAL_EPISODES:3d}"
-                    f" | avg len: {int(sum(eval_metrics['num_steps']) / config.NUM_EVAL_EPISODES):3d} / {config.MAX_EPISODE_STEPS:3d}"
+                    # f" | avg len: {int(sum(eval_metrics['num_steps']) / config.NUM_EVAL_EPISODES):3d} / {config.MAX_EPISODE_STEPS:3d}"
                     f" | train loss: {losses[-1] / config.BATCH_SIZE / config.BATCHES_PER_CYCLE:.3e}"
                 )
 
