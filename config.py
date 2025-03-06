@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, validator
 
 class Config(BaseModel):
     # environment
-    STRING_LENGTH: int = Field(default=30)
+    STRING_LENGTH: int = Field(default=50)
 
     # policy
     POLICY_TYPE: str = Field(default="EGreedyPolicy")  # HER: EGreedyPolicyWithNoise
@@ -29,15 +29,7 @@ class Config(BaseModel):
     NUM_EVAL_EPISODES: int = Field(default=500)
 
     # logging
-    VERBOSITY: int = Field(
-        description=(
-            "0: No logging\n"
-            "1: Print the final state of each episode\n"
-            "2: Print loss\n"
-            "3: Print the intermediate states in a buffer\n"
-        ),
-        default=2
-    )
+    VERBOSITY: int = Field(default=1)
     LOGGING_RATE: int = Field(description="episodes per log", default=1000)
 
     # hardware

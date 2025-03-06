@@ -97,7 +97,7 @@ def evaluate(dqn: DQN, policy: Policy, config: Config):
     num_solved = 0
 
     for episode_i in range(config.NUM_EVAL_EPISODES):
-        environment = BitStringEnvironment(config.MAX_EPISODE_STEPS, config.DEVICE)
+        environment = BitStringEnvironment(config.STRING_LENGTH, config.DEVICE)
 
         num_environment_steps = 0
         while (

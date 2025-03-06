@@ -57,28 +57,28 @@ class DQN:
         self.criterion = torch.nn.MSELoss()
 
 
+    @torch.no_grad()
     def infer_single(self, state: torch.Tensor, goal: torch.Tensor, network: str = "query"):
         assert network in ["query", "target"]
 
-        with torch.no_grad():
-            input = (state.unsqueeze(0), goal.unsqueeze(0))
+        input = (state.unsqueeze(0), goal.unsqueeze(0))
 
-            if network == "query":
-                return self.query_network(*input)[0]
+        if network == "query":
+            return self.query_network(*input)[0]
 
-            else:
-                return self.target_network(*input)[0]
+        else:
+            return self.target_network(*input)[0]
     
 
+    @torch.no_grad()
     def update_target_network(self, momentum: int):
-        with torch.no_grad():
-            for query_param, target_param in zip(
-                self.query_network.parameters(), self.target_network.parameters()
-            ):
-                target_param.data = (
-                    momentum * query_param.data +
-                    (1 - momentum) * target_param.data
-                )
+        for query_param, target_param in zip(
+            self.query_network.parameters(), self.target_network.parameters()
+        ):
+            target_param.data = (
+                momentum * query_param.data +
+                (1 - momentum) * target_param.data
+            )
 
 
     def step_batch(self, batch: List[Replay]):
