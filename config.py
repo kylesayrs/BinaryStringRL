@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, validator
 
 class Config(BaseModel):
     # environment
-    STRING_LENGTH: int = Field(default=50)
+    STRING_LENGTH: int = Field(default=30)
 
     # policy
     POLICY_TYPE: str = Field(default="EGreedyPolicy")  # HER: EGreedyPolicyWithNoise
